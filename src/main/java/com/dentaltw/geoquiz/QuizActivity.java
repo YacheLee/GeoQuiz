@@ -1,5 +1,7 @@
 package com.dentaltw.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,13 +14,16 @@ import android.widget.Toast;
 public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT= 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mPrevButton;
     private ImageButton mNextButton;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
     private int mCurrentIndex = 0;
+    private boolean mIsCheater;
 
     private Boolean[] answers = {null, null, null, null, null, null};
     private Question[] mQuestionBank = new Question[]{
@@ -68,7 +73,16 @@ public class QuizActivity extends AppCompatActivity {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            next();
+                next();
+            }
+        });
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
         });
         updateQuestion();
@@ -127,8 +141,14 @@ public class QuizActivity extends AppCompatActivity {
         answers[mCurrentIndex] = isCorrect;
         next();
         if(hasAllAnswered()){
-            float score = getScore();
-            Toast.makeText(this, String.valueOf(score), Toast.LENGTH_SHORT).show();
+            if(mIsCheater){
+                Toast.makeText(this, R.string.judgment_toast, Toast.LENGTH_SHORT).show();
+            }
+            else{
+                float score = getScore();
+                String msg = String.valueOf(score);
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -138,6 +158,7 @@ public class QuizActivity extends AppCompatActivity {
             mCurrentIndex++;
         }
         Log.v(TAG,String.valueOf(mCurrentIndex));
+        mIsCheater = false;
         updateQuestion();
         updateStatus();
     }
@@ -195,5 +216,18 @@ public class QuizActivity extends AppCompatActivity {
         float percent = (float) correctCount/size * 100;
         Log.v(TAG,String.valueOf(percent));
         return percent;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode != Activity.RESULT_OK){
+            return;
+        }
+        else if(resultCode == REQUEST_CODE_CHEAT){
+            if(data==null){
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 }
