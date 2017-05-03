@@ -2,6 +2,7 @@ package com.dentaltw.geoquiz;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +23,8 @@ public class QuizActivity extends AppCompatActivity {
     private ImageButton mNextButton;
     private Button mCheatButton;
     private TextView mQuestionTextView;
+    private TextView mApiTextView;
+
     private int mCurrentIndex = 0;
     private boolean mIsCheater;
 
@@ -50,6 +53,10 @@ public class QuizActivity extends AppCompatActivity {
         mTrueButton = (Button) findViewById(R.id.true_button);
         mFalseButton = (Button) findViewById(R.id.false_button);
         mPrevButton = (ImageButton) findViewById(R.id.prev_button);
+        mApiTextView = (TextView) findViewById(R.id.api_text_view);
+
+        mApiTextView.setText("API Level:"+String.valueOf(Build.VERSION.SDK_INT));
+
 
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
